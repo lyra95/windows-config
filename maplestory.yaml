@@ -1,0 +1,23 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: nexon-plug
+      settings:
+        id: Nexon.NexonPlug
+        source: winget
+    - resource: PSDscResources/Script
+      id: SetSystemLocaleToKoKR
+      directives:
+        description: Set system locale for non-Unicode programs (requires reboot)
+      settings:
+        GetScript: |
+          (Get-WinSystemLocale).Name
+        TestScript: |
+          (Get-WinSystemLocale).Name -eq 'ko-KR'
+        SetScript: |
+          Set-WinSystemLocale -SystemLocale 'ko-KR'
+
+  configurationVersion: 0.2.0

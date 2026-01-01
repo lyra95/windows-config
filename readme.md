@@ -1,0 +1,2 @@
+ - 간단한 interactive wrapper 스크립트 만들기
+ - vs code 따로 빼내기

@@ -1,0 +1,39 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+# https://github.com/microsoft/winget-cli/issues/4264#issuecomment-2689492045
+# Microsoft-Windows-Subsystem-Linux Enable 할 때 왠 ComObject 파싱 에러가 발생함
+# PowerShell 7 이상에서 winget 대신 Microsoft.WinGet.Configuration 모듈로 시도하면 된다는 우회법이 있음
+# 1. PowerShell 7 실행 (관리자로)
+#   https://github.com/microsoft/winget-cli/issues/5369
+#   securityContext: elevated 옵션이 있는데도 불구하고 권한 문제 발생해서
+#   관리자 모드로 PowerShell 7 실행해야 함...
+# 2. Install-PSResource -Name Microsoft.WinGet.Configuration
+# 3. Get-WinGetConfiguration -File wsk.yaml | Invoke-WinGetConfiguration
+properties:
+  resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.WSL
+      settings:
+        id: "Microsoft.WSL"
+        source: winget
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: EnableWSLFeature
+      directives:
+        dependsOn:
+          - Microsoft.WSL
+        securityContext: elevated
+      settings:
+        Name: "Microsoft-Windows-Subsystem-Linux"
+        Ensure: "Present"
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: EnableVirtualMachinePlatform
+      directives:
+        dependsOn:
+          - Microsoft.WSL
+        securityContext: elevated
+      settings:
+        Name: "VirtualMachinePlatform"
+        Ensure: "Present"
+
+  configurationVersion: 0.2.0

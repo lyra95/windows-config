@@ -1,0 +1,26 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  resources:
+    - resource: PSDscResources/Script
+      id: NvidiaAppInstall
+      settings:
+        SetScript: |
+          $url = "https://kr.download.nvidia.com/nvapp/client/11.0.5.420/NVIDIA_app_v11.0.5.420.exe"
+          $output = "$env:TEMP\NVIDIA_app.exe"
+          Invoke-WebRequest -Uri $url -OutFile $output
+          Start-Process -FilePath $output -ArgumentList "/s" -Wait
+        GetScript: |
+          Get-WinGetPackage -Name "NVIDIA App" -ErrorAction SilentlyContinue | ForEach-Object { return $_.InstalledVersion }
+        
+        # Check if NVIDIA App is installed with any version
+        TestScript: |
+          $package = Get-WinGetPackage -Name "NVIDIA App" -ErrorAction SilentlyContinue
+          if ($null -ne $package) {
+              return $true
+          } else {
+              return $false
+          }
+
+  configurationVersion: 0.2.0

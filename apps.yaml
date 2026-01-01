@@ -1,0 +1,32 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: 1password
+      settings:
+        id: AgileBits.1Password
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: spotify
+      settings:
+        id: Spotify.Spotify
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: discord
+      settings:
+        id: Discord.Discord
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: steam
+      settings:
+        id: Valve.Steam
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: kakaotalk
+      settings:
+        id: XP9K178L5G0JQ0
+        source: msstore
+
+  configurationVersion: 0.2.0

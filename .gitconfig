@@ -1,0 +1,26 @@
+[alias]
+        fp = "push --force"
+        gc-all = "gc -q --prune --aggressive --keep-largest-pack --force"
+        ig = "!vim \"$(git rev-parse --show-toplevel)/.gitignore\""
+        last = "show HEAD"
+        lg = "log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+        oops = "commit -a --amend --no-edit"
+        pu = "!git push --set-upstream origin \"$(git rev-parse --abbrev-ref HEAD)\""
+        rb = "rebase --interactive"
+
+[delta]
+        colorMoved = "default"
+        hyperlinks = true
+        line-numbers = true
+        navigate = true
+        side-by-side = true
+
+[init]
+        defaultBranch = "main"
+
+[merge]
+        conflictstyle = "diff3"
+
+[user]
+        email = "95hyouka@gmail.com"
+        name = "jo"
