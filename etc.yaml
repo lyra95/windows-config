@@ -1,0 +1,13 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  resources:
+    # 매번 재설치 물어봐서 여기로 따로 분리
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: kakaotalk
+      settings:
+        id: XP9K178L5G0JQ0
+        source: msstore
+
+  configurationVersion: 0.2.0

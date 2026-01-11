@@ -24,9 +24,19 @@ properties:
         id: Valve.Steam
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: kakaotalk
+      id: pdf
       settings:
-        id: XP9K178L5G0JQ0
-        source: msstore
+        id: StirlingTools.StirlingPDF
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: parsec
+      settings:
+        id: Parsec.Parsec
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: libreoffice
+      settings:
+        id: TheDocumentFoundation.LibreOffice
+        source: winget
 
   configurationVersion: 0.2.0
