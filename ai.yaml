@@ -1,0 +1,37 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: claudeCode
+      settings:
+        id: Anthropic.ClaudeCode
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: openCode
+      settings:
+        id: SST.opencode
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: openCodeDesktop
+      settings:
+        id: SST.OpenCodeDesktop
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: bun
+      settings:
+        id: Oven-sh.Bun
+        source: winget
+    - resource: PSDscResources/Script
+      id: oh-my-opencode
+      dependsOn:
+        - bun
+      settings:
+        GetScript: $False
+        TestScript: $False
+        SetScript: |
+          bunx oh-my-opencode install --no-tui --claude=yes --chatgpt=yes --gemini=yes
+        
+
+  configurationVersion: 0.2.0
