@@ -1,0 +1,13 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  resources:
+    # vscode devcontainer 쓰려면 "dev.containers.dockerPath": "podman" 설정 필요
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: podman-desktop
+      settings:
+        id: RedHat.Podman-Desktop
+        source: winget
+
+  configurationVersion: 0.2.0

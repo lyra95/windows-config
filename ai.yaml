@@ -31,7 +31,7 @@ properties:
         GetScript: $False
         TestScript: $False
         SetScript: |
-          bunx oh-my-opencode install --no-tui --claude=yes --chatgpt=yes --gemini=yes
+          bunx oh-my-opencode install --no-tui --claude=max20 --openai=yes --gemini=yes --copilot=no
         
 
   configurationVersion: 0.2.0

@@ -10,8 +10,22 @@ properties:
       settings:
         SetScript: |
           Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null;
+        GetScript: |
+          Get-Module -ListAvailable -Name Microsoft.WinGet.Client
+        TestScript: |
+          $modules = Get-Module -ListAvailable -Name Microsoft.WinGet.Client
+          return $modules.Count -gt 0
+    # $HOME\.local\bin 경로를 PATH에 추가
+    - resource: PSDscResources/Script
+      settings:
         GetScript: return $false
-        TestScript: return $false
+        TestScript: |
+          $userEnv = [System.Environment]::GetEnvironmentVariable("PATH", "User");
+          return $userEnv.Split(";") -contains "$HOME\.local\bin"
+        SetScript: |
+          $userEnv = [System.Environment]::GetEnvironmentVariable("PATH", "User");
+          [System.Environment]::SetEnvironmentVariable("PATH", "$userEnv;$HOME\.local\bin", "User");
+
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: vscode
