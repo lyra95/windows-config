@@ -9,7 +9,7 @@
 #   securityContext: elevated 옵션이 있는데도 불구하고 권한 문제 발생해서
 #   관리자 모드로 PowerShell 7 실행해야 함...
 # 2. Install-PSResource -Name Microsoft.WinGet.Configuration
-# 3. Get-WinGetConfiguration -File wsk.yaml | Invoke-WinGetConfiguration
+# 3. Get-WinGetConfiguration -File wsl.yaml | Invoke-WinGetConfiguration
 properties:
   resources:
     - resource: Microsoft.WinGet.DSC/WinGetPackage
