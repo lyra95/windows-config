@@ -29,31 +29,34 @@ properties:
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: vscode
-      directives:
-        description: Install Visual Studio Code
       settings:
         id: Microsoft.VisualStudioCode
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: powershell
-      directives:
-        description: Install Powershell
       settings:
         id: Microsoft.PowerShell
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: windows-terminal
-      directives:
-        description: Install Windows Terminal
       settings:
         id: Microsoft.WindowsTerminal
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: firefox
-      directives:
-        description: Install firefox
       settings:
         id: Mozilla.Firefox
+        source: winget
+    
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: fzf
+      settings:
+        id: junegunn.fzf
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: starship
+      settings:
+        id: Starship.Starship
         source: winget
 
   configurationVersion: 0.2.0

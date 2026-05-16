@@ -38,5 +38,20 @@ properties:
       settings:
         id: TheDocumentFoundation.LibreOffice
         source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: telegram
+      settings:
+        id: Telegram.TelegramDesktop
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: tailscale
+      settings:
+        id: Tailscale.Tailscale
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: anki
+      settings:
+        id: Anki.Anki
+        source: winget
 
   configurationVersion: 0.2.0
