@@ -29,6 +29,11 @@ properties:
         id: StirlingTools.StirlingPDF
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: pdf2
+      settings:
+        id: SumatraPDF.SumatraPDF
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: parsec
       settings:
         id: Parsec.Parsec
@@ -52,6 +57,16 @@ properties:
       id: anki
       settings:
         id: Anki.Anki
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: jetbrains
+      settings:
+        id: JetBrains.Toolbox
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: slack
+      settings:
+        id: SlackTechnologies.Slack
         source: winget
 
   configurationVersion: 0.2.0
