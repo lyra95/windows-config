@@ -58,5 +58,25 @@ properties:
       settings:
         id: Starship.Starship
         source: winget
+    - resource: PSDscResources/Script
+      id: psfzf
+      settings:
+        GetScript: return $false
+        TestScript: |
+          $modules = Get-Module -ListAvailable -Name PSFzf
+          return $modules -ne $null
+        SetScript: |
+          Install-Module -Name PSFzf -Force -Repository PSGallery
+    - resource: PSDscResources/Script
+      id: powershell-profile
+      settings:
+        GetScript: return $false
+        TestScript: |
+          $profilePath = pwsh -NoProfile -Command 'Write-Output $PROFILE'
+          Test-Path -Path $profilePath
+        SetScript: |
+          $profilePath = pwsh -NoProfile -Command 'Write-Output $PROFILE'
+          $null = New-Item -ItemType Directory -Force -Path (Split-Path $profilePath)
+          Invoke-WebRequest -Uri 'https://gist.githubusercontent.com/lyra95/5ee9fe41cc17518344df4b563884ed0f/raw/$PROFILE' -OutFile $profilePath
 
   configurationVersion: 0.2.0
