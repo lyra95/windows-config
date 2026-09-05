@@ -26,11 +26,6 @@ properties:
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: pdf
       settings:
-        id: StirlingTools.StirlingPDF
-        source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: pdf2
-      settings:
         id: SumatraPDF.SumatraPDF
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
@@ -67,6 +62,11 @@ properties:
       id: slack
       settings:
         id: SlackTechnologies.Slack
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: space-sniffer
+      settings:
+        id: UderzoSoftware.SpaceSniffer
         source: winget
 
   configurationVersion: 0.2.0
