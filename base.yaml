@@ -26,6 +26,16 @@ properties:
           $userEnv = [System.Environment]::GetEnvironmentVariable("PATH", "User");
           [System.Environment]::SetEnvironmentVariable("PATH", "$userEnv;$HOME\.local\bin", "User");
 
+    # 파워쉘 프로필에서 로드할 스크립트 폴더 생성
+    - resource: PSDscResources/Script
+      id: my-ps-scripts
+      settings:
+        GetScript: return $false
+        TestScript: |
+          return Test-Path -Path "$HOME\.config\my-ps-scripts" -PathType Container
+        SetScript: |
+          $null = New-Item -ItemType Directory -Force -Path "$HOME\.config\my-ps-scripts"
+
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: vscode
@@ -69,14 +79,28 @@ properties:
           Install-Module -Name PSFzf -Force -Repository PSGallery
     - resource: PSDscResources/Script
       id: powershell-profile
+      dependsOn:
+        - powershell
+      directives:
+        description: 파워쉘 프로필을 이 리포의 profile.ps1로 심볼릭 링크
+        securityContext: elevated
       settings:
         GetScript: return $false
         TestScript: |
           $profilePath = pwsh -NoProfile -Command 'Write-Output $PROFILE'
-          Test-Path -Path $profilePath
+          $item = Get-Item -Path $profilePath -Force -ErrorAction SilentlyContinue
+          if ($null -eq $item) { return $false }
+          return [bool]($item.LinkType -eq 'SymbolicLink' -and $item.Target -eq "${WinGetConfigRoot}\profile.ps1")
         SetScript: |
+          $source = "${WinGetConfigRoot}\profile.ps1"
+          if (-not (Test-Path -Path $source -PathType Leaf)) {
+            throw "원본 프로필을 찾을 수 없습니다: $source"
+          }
           $profilePath = pwsh -NoProfile -Command 'Write-Output $PROFILE'
-          $null = New-Item -ItemType Directory -Force -Path (Split-Path $profilePath)
-          Invoke-WebRequest -Uri 'https://gist.githubusercontent.com/lyra95/5ee9fe41cc17518344df4b563884ed0f/raw/$PROFILE' -OutFile $profilePath
+          New-Item -ItemType Directory -Force -Path (Split-Path $profilePath)
+          if (Test-Path -Path $profilePath) {
+            Move-Item -Path $profilePath -Destination "${profilePath}.backup" -Force
+          }
+          New-Item -ItemType SymbolicLink -Path $profilePath -Target $source
 
   configurationVersion: 0.2.0

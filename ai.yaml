@@ -13,5 +13,20 @@ properties:
       settings:
         id: Anthropic.ClaudeCode
         source: winget
+    - resource: PSDscResources/Script
+      id: claude-completion
+      directives:
+        securityContext: elevated
+      settings:
+        GetScript: return $false
+        TestScript: |
+          $target = Join-Path $HOME '.config\my-ps-scripts\claude-completion.ps1'
+          $item = Get-Item -Path $target -Force -ErrorAction SilentlyContinue
+          if ($null -eq $item) { return $false }
+          return [bool]($item.LinkType -eq 'SymbolicLink' -and $item.Target -eq "${WinGetConfigRoot}\claude-completion.ps1")
+        SetScript: |
+          $target = Join-Path $HOME '.config\my-ps-scripts\claude-completion.ps1'
+          $null = New-Item -ItemType Directory -Force -Path (Split-Path $target)
+          $null = New-Item -ItemType SymbolicLink -Path $target -Target "${WinGetConfigRoot}\claude-completion.ps1" -Force
 
   configurationVersion: 0.2.0
