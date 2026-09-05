@@ -4,6 +4,9 @@
 properties:
   resources:
     # vscode devcontainer 쓰려면 "dev.containers.dockerPath": "podman" 설정 필요
+    # podman machine init에 저장 경로 옵션 없음 (https://github.com/containers/podman/issues/13984)
+    # init 전에 %USERPROFILE%\.local\share\containers\podman\machine\wsl\wsldist 를 지우고
+    # New-Item -ItemType Junction -Path <위 경로> -Target E:\podman\wsldist 로 정션 연결
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: podman-desktop
       settings:
