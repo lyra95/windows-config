@@ -20,5 +20,19 @@ properties:
       settings:
         id: GitHub.cli
         source: winget
+    - resource: PSDscResources/Script
+      id: gitconfig
+      directives:
+        securityContext: elevated
+      settings:
+        GetScript: return $false
+        TestScript: |
+          $gitConfigPath = Join-Path -Path $env:USERPROFILE -ChildPath ".gitconfig"
+          $item = Get-Item -Path $gitConfigPath -Force -ErrorAction SilentlyContinue
+          if ($null -eq $item) { return $false }
+          return [bool]($item.LinkType -eq 'SymbolicLink' -and $item.Target -eq "${WinGetConfigRoot}\.gitconfig")
+        SetScript: |
+          $gitConfigPath = Join-Path -Path $env:USERPROFILE -ChildPath ".gitconfig"
+          $null = New-Item -ItemType SymbolicLink -Path $gitConfigPath -Target "${WinGetConfigRoot}\.gitconfig" -Force
 
   configurationVersion: 0.2.0
