@@ -74,7 +74,7 @@ properties:
         GetScript: return $false
         TestScript: |
           $modules = Get-Module -ListAvailable -Name PSFzf
-          return $modules -ne $null
+          return $null -ne $modules
         SetScript: |
           Install-Module -Name PSFzf -Force -Repository PSGallery
     - resource: PSDscResources/Script
@@ -97,10 +97,10 @@ properties:
             throw "원본 프로필을 찾을 수 없습니다: $source"
           }
           $profilePath = pwsh -NoProfile -Command 'Write-Output $PROFILE'
-          New-Item -ItemType Directory -Force -Path (Split-Path $profilePath)
+          $null = New-Item -ItemType Directory -Force -Path (Split-Path $profilePath)
           if (Test-Path -Path $profilePath) {
             Move-Item -Path $profilePath -Destination "${profilePath}.backup" -Force
           }
-          New-Item -ItemType SymbolicLink -Path $profilePath -Target $source
+          $null = New-Item -ItemType SymbolicLink -Path $profilePath -Target $source
 
   configurationVersion: 0.2.0
