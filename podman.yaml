@@ -13,4 +13,65 @@ properties:
         id: RedHat.Podman-Desktop
         source: winget
 
+    # Podman CLI는 Podman Desktop이 관리하도록 하되, Desktop 설치만으로는 CLI가 설치되지 않으므로
+    # Desktop이 번들로 들고 있는 MSI(Desktop이 UI에서 쓰는 것과 동일)를 조용히 설치.
+    # 같은 MSI 제품이라 이후 업그레이드는 Desktop이 그대로 제안함.
+    # MSI 속성이 ALLUSERS=2, MSIINSTALLPERUSER=1 이라 관리자 권한으로 돌려도 per-user(%LOCALAPPDATA%\Programs\Podman)로 설치됨.
+    - resource: PSDscResources/Script
+      id: podman-cli
+      dependsOn:
+        - podman-desktop
+      directives:
+        description: Podman Desktop에 번들된 MSI로 Podman CLI 설치
+      settings:
+        GetScript: return $false
+        TestScript: |
+          $podman = (Get-Command podman -CommandType Application -ErrorAction SilentlyContinue).Source
+          if (-not $podman) {
+            $podman = @("$env:LOCALAPPDATA\Programs\Podman\podman.exe", "$env:ProgramFiles\RedHat\Podman\podman.exe") |
+              Where-Object { Test-Path -Path $_ -PathType Leaf } | Select-Object -First 1
+          }
+          return [bool]$podman
+        SetScript: |
+          $desktop = "$env:LOCALAPPDATA\Programs\Podman Desktop"
+          $msi = Get-ChildItem -Path "$desktop\resources\extensions\podman" -Recurse -Filter 'podman-installer-windows-amd64.msi' -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if ($null -eq $msi) { throw "Podman Desktop에 번들된 Podman CLI 설치 파일을 찾을 수 없습니다: $desktop" }
+          $log = Join-Path $env:TEMP 'podman-cli-install.log'
+          $proc = Start-Process -FilePath msiexec.exe -Wait -PassThru -ArgumentList @('/i', "`"$($msi.FullName)`"", '/qn', '/norestart', 'MACHINE_PROVIDER=wsl', '/L*V', "`"$log`"")
+          # 0 = 성공, 3010 = 성공(재부팅 필요)
+          if ($proc.ExitCode -notin 0, 3010) { throw "Podman CLI 설치 실패 (exit $($proc.ExitCode)). 로그: $log" }
+
+    # $HOME\.local\bin\docker.exe -> podman.exe 심볼릭 링크 (docker CLI 호환)
+    # podman 설치 경로는 레지스트리에 기록되지 않고 MSI가 사용자 PATH에만 추가하므로
+    # Get-Command로 찾고, 같은 실행에서 방금 설치돼 PATH가 아직 갱신되지 않은 경우를 위해 기본 설치 경로를 fallback으로 확인
+    - resource: PSDscResources/Script
+      id: docker-symlink
+      dependsOn:
+        - podman-cli
+      directives:
+        description: docker.exe를 podman.exe로 심볼릭 링크
+        securityContext: elevated
+      settings:
+        GetScript: return $false
+        TestScript: |
+          $podman = (Get-Command podman -CommandType Application -ErrorAction SilentlyContinue).Source
+          if (-not $podman) {
+            $podman = @("$env:LOCALAPPDATA\Programs\Podman\podman.exe", "$env:ProgramFiles\RedHat\Podman\podman.exe") |
+              Where-Object { Test-Path -Path $_ -PathType Leaf } | Select-Object -First 1
+          }
+          if (-not $podman) { return $false }
+          $item = Get-Item -Path "$HOME\.local\bin\docker.exe" -Force -ErrorAction SilentlyContinue
+          if ($null -eq $item) { return $false }
+          return [bool]($item.LinkType -eq 'SymbolicLink' -and $item.Target -eq $podman)
+        SetScript: |
+          $podman = (Get-Command podman -CommandType Application -ErrorAction SilentlyContinue).Source
+          if (-not $podman) {
+            $podman = @("$env:LOCALAPPDATA\Programs\Podman\podman.exe", "$env:ProgramFiles\RedHat\Podman\podman.exe") |
+              Where-Object { Test-Path -Path $_ -PathType Leaf } | Select-Object -First 1
+          }
+          if (-not $podman) { throw "podman.exe를 찾을 수 없습니다" }
+          $null = New-Item -ItemType Directory -Force -Path "$HOME\.local\bin"
+          $null = New-Item -ItemType SymbolicLink -Path "$HOME\.local\bin\docker.exe" -Target $podman -Force
+
   configurationVersion: 0.2.0
