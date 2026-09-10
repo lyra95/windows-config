@@ -21,6 +21,9 @@
 [merge]
         conflictstyle = "diff3"
 
+[rebase]
+        updateRefs = true
+
 [user]
         email = "95hyouka@gmail.com"
         name = "jo"
