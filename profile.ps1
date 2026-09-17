@@ -151,6 +151,68 @@ function global:Search-Winget {
   }
 }
 
+function global:Load-DotEnv {
+    [CmdletBinding()]
+    param(
+        # .env 파일 경로 (기본값: 현재 디렉토리의 .env)
+        [Parameter(Position = 0)]
+        [string]$Path = ".env",
+
+        # 이미 존재하는 환경변수를 덮어쓸지 여부
+        [switch]$Override
+    )
+
+    if (-not (Test-Path -Path $Path -PathType Leaf)) {
+        Write-Error "dotenv 파일을 찾을 수 없습니다: $Path"
+        return
+    }
+
+    Get-Content -Path $Path -Encoding UTF8 | ForEach-Object {
+        $line = $_.Trim()
+
+        # 빈 줄, 주석(#) 건너뛰기
+        if ([string]::IsNullOrWhiteSpace($line) -or $line.StartsWith('#')) {
+            return
+        }
+
+        # "export KEY=VALUE" 형식 지원
+        if ($line -match '^export\s+') {
+            $line = $line -replace '^export\s+', ''
+        }
+
+        # KEY=VALUE 파싱 (값에 = 이 포함되어도 처리)
+        $idx = $line.IndexOf('=')
+        if ($idx -lt 1) {
+            Write-Warning "잘못된 형식의 줄을 건너뜁니다: $line"
+            return
+        }
+
+        $key   = $line.Substring(0, $idx).Trim()
+        $value = $line.Substring($idx + 1).Trim()
+
+        # 따옴표 제거 ("value" 또는 'value')
+        if ($value.Length -ge 2) {
+            if (($value.StartsWith('"') -and $value.EndsWith('"')) -or
+                ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+        }
+
+        # 큰따옴표 값의 이스케이프 처리 (\n, \t 등)
+        $value = $value -replace '\\n', "`n" -replace '\\t', "`t"
+
+        # 기존 환경변수가 있고 -Override가 없으면 건너뛰기
+        $existing = [Environment]::GetEnvironmentVariable($key, 'Process')
+        if ($null -ne $existing -and -not $Override) {
+            Write-Verbose "이미 존재하는 변수라 건너뜁니다: $key"
+            return
+        }
+
+        [Environment]::SetEnvironmentVariable($key, $value, 'Process')
+        Write-Verbose "로드됨: $key"
+    }
+}
+
 # ~/.config/my-ps-scripts/*.ps1 로드 (파일명 순, 하나가 깨져도 나머지는 로드)
 $myPsScripts = Join-Path $HOME '.config\my-ps-scripts'
 if (Test-Path -Path $myPsScripts -PathType Container) {
