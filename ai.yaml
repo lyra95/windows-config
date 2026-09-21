@@ -18,7 +18,8 @@ properties:
       directives:
         securityContext: elevated
       settings:
-        GetScript: return $false
+        GetScript: |
+          return $false
         TestScript: |
           $target = Join-Path $HOME '.config\my-ps-scripts\claude-completion.ps1'
           $item = Get-Item -Path $target -Force -ErrorAction SilentlyContinue

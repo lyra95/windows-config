@@ -18,7 +18,8 @@ properties:
     # $HOME\.local\bin 경로를 PATH에 추가
     - resource: PSDscResources/Script
       settings:
-        GetScript: return $false
+        GetScript: |
+          return $false
         TestScript: |
           $userEnv = [System.Environment]::GetEnvironmentVariable("PATH", "User");
           return $userEnv.Split(";") -contains "$HOME\.local\bin"
@@ -30,7 +31,8 @@ properties:
     - resource: PSDscResources/Script
       id: my-ps-scripts
       settings:
-        GetScript: return $false
+        GetScript: |
+          return $false
         TestScript: |
           return Test-Path -Path "$HOME\.config\my-ps-scripts" -PathType Container
         SetScript: |
@@ -71,7 +73,8 @@ properties:
     - resource: PSDscResources/Script
       id: psfzf
       settings:
-        GetScript: return $false
+        GetScript: |
+          return $false
         TestScript: |
           $modules = Get-Module -ListAvailable -Name PSFzf
           return $null -ne $modules
@@ -85,7 +88,8 @@ properties:
         description: 파워쉘 프로필을 이 리포의 profile.ps1로 심볼릭 링크
         securityContext: elevated
       settings:
-        GetScript: return $false
+        GetScript: |
+          return $false
         TestScript: |
           $profilePath = pwsh -NoProfile -Command 'Write-Output $PROFILE'
           $item = Get-Item -Path $profilePath -Force -ErrorAction SilentlyContinue

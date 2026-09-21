@@ -24,7 +24,8 @@ properties:
       directives:
         description: Podman Desktop에 번들된 MSI로 Podman CLI 설치
       settings:
-        GetScript: return $false
+        GetScript: |
+          return $false
         TestScript: |
           $podman = (Get-Command podman -CommandType Application -ErrorAction SilentlyContinue).Source
           if (-not $podman) {
@@ -53,7 +54,8 @@ properties:
         description: docker.exe를 podman.exe로 심볼릭 링크
         securityContext: elevated
       settings:
-        GetScript: return $false
+        GetScript: |
+          return $false
         TestScript: |
           $podman = (Get-Command podman -CommandType Application -ErrorAction SilentlyContinue).Source
           if (-not $podman) {

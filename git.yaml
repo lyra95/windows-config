@@ -25,7 +25,8 @@ properties:
       directives:
         securityContext: elevated
       settings:
-        GetScript: return $false
+        GetScript: |
+          return $false
         TestScript: |
           $gitConfigPath = Join-Path -Path $env:USERPROFILE -ChildPath ".gitconfig"
           $item = Get-Item -Path $gitConfigPath -Force -ErrorAction SilentlyContinue
