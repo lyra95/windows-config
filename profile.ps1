@@ -38,6 +38,11 @@ function Invoke-ExpressionGlobal {
     }
 }
 
+# if codex is installed, set up completion
+if (Get-Command codex -ErrorAction SilentlyContinue) {
+  Invoke-Expression (codex completion powershell | Out-String)
+}
+
 # podman
 Set-Alias -Name docker -Value podman
 Register-ArgumentCompleter -CommandName 'podman', 'docker' -ScriptBlock {
