@@ -70,6 +70,30 @@ properties:
       settings:
         id: Starship.Starship
         source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: gnu-make
+      settings:
+        id: GnuWin32.Make
+        source: winget
+    - resource: PSDscResources/Script
+      id: register-gnu-make
+      dependsOn:
+        - gnu-make
+      settings:
+        GetScript: |
+          return $false
+        TestScript: |
+          $installDir = 'C:\Program Files (x86)\GnuWin32\bin'
+          $userPath = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
+          return @($userPath -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ieq $installDir }).Count -gt 0
+        SetScript: |
+          $installDir = 'C:\Program Files (x86)\GnuWin32\bin'
+          $userPath = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
+          $pathEntries = @($userPath -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+          if (-not ($pathEntries | Where-Object { $_ -ieq $installDir })) {
+            $pathEntries += $installDir
+            [System.Environment]::SetEnvironmentVariable('PATH', ($pathEntries -join ';'), 'User')
+          }
     - resource: PSDscResources/Script
       id: psfzf
       settings:
@@ -80,6 +104,16 @@ properties:
           return $null -ne $modules
         SetScript: |
           Install-Module -Name PSFzf -Force -Repository PSGallery
+    - resource: PSDscResources/Script
+      id: PSScriptAnalyzer
+      settings:
+        GetScript: |
+          return $false
+        TestScript: |
+          $modules = Get-Module -ListAvailable -Name PSScriptAnalyzer
+          return $null -ne $modules
+        SetScript: |
+          Install-Module -Name PSScriptAnalyzer -Force
     - resource: PSDscResources/Script
       id: powershell-profile
       dependsOn:
