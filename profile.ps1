@@ -156,6 +156,25 @@ function global:Search-Winget {
   }
 }
 
+Set-Alias -Name touch -Value Touch-File
+Function Touch-File
+{
+    $file = $args[0]
+    if($file -eq $null) {
+        throw "No filename supplied"
+    }
+
+    if(Test-Path $file)
+    {
+        (Get-ChildItem $file).LastWriteTime = Get-Date
+    }
+    else
+    {
+        echo $null > $file
+    }
+}
+
+
 Set-Alias -Name dotenv -Value Set-DotEnv
 function global:Set-DotEnv {
     [CmdletBinding()]
