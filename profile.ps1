@@ -18,6 +18,8 @@ Set-PSReadLineKeyHandler -Chord 'Ctrl+r' -ScriptBlock {
 # mac-like open command
 Set-Alias -Name open -Value Invoke-Item
 
+Set-Alias -Name which -Value Get-Command
+
 # misc
 Set-PSReadLineOption -HistoryNoDuplicates:$True
 
