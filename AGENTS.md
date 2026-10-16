@@ -1,32 +1,59 @@
 # AGENTS.md
 
-Personal dotfiles for a Windows machine: WinGet DSC YAML configs + PowerShell profile. No build, no tests, no CI. Repo comments and commit messages are often in Korean.
+Personal Windows dotfiles: WinGet DSC configuration documents, a PowerShell profile, and helper files. There is no build, test suite, or CI. Comments and commit messages are often in Korean; preserve that style in nearby code.
 
-## Layout
+## Repository map
 
-- `*.yaml` — each file is a standalone WinGet Configuration DSC document (schema 0.2, ends with `configurationVersion: 0.2.0` under `properties`). Files are applied independently on the target machine; do not merge them.
-- `profile.ps1` — PowerShell profile. `base.yaml` symlinks `$PROFILE` to it. Do not rename or move: DSC TestScripts check the exact target path and the live session breaks.
-- `claude-completion.ps1` — `claude` CLI argument completer **generated from `claude -h`** (header notes the CLI version it was generated from). `ai.yaml` symlinks it into `~/.config/my-ps-scripts/`. Regenerate when the CLI's flags change.
-- `.gitconfig` — symlinked to `%USERPROFILE%\.gitconfig` by `git.yaml`. Do not rename.
-- `update-non-winget.ps1` — updates software installed outside WinGet when its package manager provides an update command. Keep it in sync with non-WinGet installs in the DSC configs.
-- `makefile` — single target: `format`.
+### WinGet configuration documents
 
-## Commands
+Each YAML file is a standalone WinGet Configuration DSC document using schema 0.2 and ending in `properties.configurationVersion: 0.2.0`. Apply files independently; do not combine them.
 
-- Apply a config on the target machine (PowerShell 7, elevated):
-  `Get-WinGetConfiguration -File <name>.yaml | Invoke-WinGetConfiguration`
-  Requires the `Microsoft.WinGet.Configuration` module (`Install-PSResource -Name Microsoft.WinGet.Configuration`).
-- Do not use the `winget` CLI to apply: WSL optional-feature resources fail with a ComObject parse error (workaround documented in `wsl.yaml` header).
-- `make format` — reformats `profile.ps1` with `Invoke-Formatter` (from PSScriptAnalyzer; both are installed by `base.yaml`). Needs GNU Make from `C:\Program Files (x86)\GnuWin32\bin` on PATH, which `base.yaml` registers.
-- `pwsh -File .\update-non-winget.ps1` — updates repository-configured non-WinGet software; use `-WhatIf` to preview supported updates.
-- After editing `profile.ps1` in a live session, run `Reload` (defined in the profile).
+Keep the configuration files and the assets they reference at the repository root. The repo is small, each YAML is invoked independently by filename, and DSC scripts use `${WinGetConfigRoot}` to find root-level assets such as `profile.ps1`, `.gitconfig`, and `claude-completion.ps1`. A directory split would add path indirection without clarifying ownership; if a real need arises to move files, update all references and invocation examples together.
 
-## Conventions
+- `base.yaml` — Developer Mode; WinGet DSC support module; user PATH and script-folder setup; WinGet packages (VS Code, PowerShell, Windows Terminal, Firefox, fzf, Starship, GNU Make); PowerShell modules (PSFzf, PSScriptAnalyzer); profile symlink.
+- `apps.yaml` — general desktop applications installed from the `winget` source.
+- `ai.yaml` — Codex CLI installed globally with npm; Claude desktop and Claude Code from WinGet; Claude Code completion symlink.
+- `git.yaml` — Fork, Git, and GitHub CLI from WinGet; `.gitconfig` symlink.
+- `etc.yaml` — KakaoTalk from the `msstore` source. Keep it separate from `apps.yaml`: reinstalling from msstore prompts again.
+- `maplestory.yaml` — Nexon Plug from WinGet and Korean system locale configuration (locale change may require reboot).
+- `nvidia.yaml` — NVIDIA App installed by downloading and running a versioned installer. The app's own UI is the documented update path.
+- `podman.yaml` — Podman Desktop from WinGet; Podman CLI installed from the MSI bundled with Desktop; `$HOME\.local\bin\docker.exe` symlink to `podman.exe`.
+- `wsl.yaml` — WSL from WinGet and Windows optional features for WSL/virtualization.
 
-- DSC resource types: `Microsoft.WinGet.DSC/WinGetPackage` for packages, `PSDscResources/Script` (Get/Test/SetScript) for custom steps, `PSDscResources/WindowsOptionalFeature` for Windows features.
-- Symlinks and user-PATH changes need `securityContext: elevated` in `directives`; cross-resource ordering uses `dependsOn` at the resource level (see `base.yaml`, `podman.yaml`).
-- `etc.yaml` (KakaoTalk, msstore source) is intentionally kept out of `apps.yaml` because msstore packages re-prompt on reinstall. Do not merge it back.
-- When adding or changing software installed from a non-WinGet source (for example, a `PSDscResources/Script` install step), add or update its updater in `update-non-winget.ps1` in the same change. If no reliable automated update method exists, document that limitation next to the install resource or in the script instead of guessing another package manager. WinGet packages are excluded because they are updated with WinGet.
-- The current updater handles PowerShell Gallery modules and global npm packages (`@openai/codex` from `ai.yaml`). NVIDIA App (`nvidia.yaml`) has no updater configured here; update it through the app's own UI.
-- `profile.ps1` dot-sources every `~/.config/my-ps-scripts/*.ps1` in filename order; one broken script only warns. Put extra personal scripts in that folder instead of editing the profile.
-- Files are UTF-8 without BOM (`make format` writes `utf8NoBOM`); `profile.ps1` also forces UTF-8 console encoding.
+### Other files
+
+- `profile.ps1` — PowerShell profile symlinked to `$PROFILE` by `base.yaml`. Keep this exact path and filename: DSC checks the target and the live shell depends on it.
+- `claude-completion.ps1` — argument completer generated from `claude -h`; its header records the CLI version. `ai.yaml` symlinks it into `~/.config/my-ps-scripts/`. Regenerate when Claude CLI flags change.
+- `update-non-winget.ps1` — updater for supported software installed outside WinGet. Keep it synchronized with non-WinGet installation resources.
+- `.gitconfig` — symlinked to `%USERPROFILE%\.gitconfig` by `git.yaml`; do not rename.
+- `makefile` — only the `format` target, which formats `profile.ps1`.
+- `readme.md` — currently a short Korean TODO list.
+
+## Common commands
+
+Apply one config on the target machine in elevated PowerShell 7:
+
+```powershell
+Get-WinGetConfiguration -File <name>.yaml | Invoke-WinGetConfiguration
+```
+
+This requires the `Microsoft.WinGet.Configuration` module, installable with `Install-PSResource -Name Microsoft.WinGet.Configuration`. Do not apply configs with the `winget` CLI: the WSL optional-feature resources fail with a COM object parse error. The workaround is documented in `wsl.yaml`.
+
+Format the profile with `make format`. This uses `Invoke-Formatter` from PSScriptAnalyzer and GNU Make at `C:\Program Files (x86)\GnuWin32\bin`; `base.yaml` installs/registers these. After editing `profile.ps1` in a live session, run `Reload`.
+
+Run the non-WinGet updater in PowerShell 7:
+
+```powershell
+pwsh -File .\update-non-winget.ps1
+pwsh -File .\update-non-winget.ps1 -WhatIf
+```
+
+The updater currently handles PowerShell Gallery modules and global npm packages (including `@openai/codex`). It does not update WinGet packages. NVIDIA App is updated through its own UI; Podman CLI is supplied by Podman Desktop and should be refreshed through that parent app.
+
+## Configuration conventions
+
+- Use `Microsoft.WinGet.DSC/WinGetPackage` for WinGet/MS Store packages, `PSDscResources/Script` for custom steps, and `PSDscResources/WindowsOptionalFeature` for Windows features.
+- Put resource dependencies in resource-level `dependsOn`. Use `directives.securityContext: elevated` for symlinks or user-PATH changes that need elevation; follow the established patterns in `base.yaml`, `git.yaml`, and `podman.yaml`.
+- `profile.ps1` dot-sources `~/.config/my-ps-scripts/*.ps1` in filename order and warns if one script fails. Add personal profile scripts to that directory rather than expanding the profile.
+- When adding or changing software installed from a non-WinGet source (including a `PSDscResources/Script` installer), update `update-non-winget.ps1` in the same change if there is a reliable automated update method. If not, document the actual update path or limitation beside the install resource or in the updater. Do not add unrelated package managers speculatively. WinGet-managed applications remain out of this updater.
+- Keep files UTF-8 without BOM. `make format` writes `profile.ps1` as `utf8NoBOM`; the profile also sets UTF-8 console encoding.
