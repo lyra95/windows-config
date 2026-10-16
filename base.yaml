@@ -3,6 +3,13 @@
 
 properties:
   resources:
+    - resource: Microsoft.Windows.Developer/DeveloperMode
+      directives:
+        securityContext: elevated
+        description: Enable Developer Mode
+        allowPrerelease: true
+      settings:
+        Ensure: Present
     - resource: PSDscResources/Script
       id: Microsoft.WinGet.Client
       directives:
