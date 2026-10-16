@@ -3,6 +3,21 @@
 
 properties:
   resources:
+    - resource: PSDscResources/Script
+      id: codex-cli-npm
+      settings:
+        GetScript: |
+          $cmd = Get-Command codex -ErrorAction SilentlyContinue
+          if ($null -eq $cmd) { return $false }
+          codex --version *> $null
+          return ($LASTEXITCODE -eq 0)
+        TestScript: |
+          $cmd = Get-Command codex -ErrorAction SilentlyContinue
+          if ($null -eq $cmd) { return $false }
+          codex --version *> $null
+          return ($LASTEXITCODE -eq 0)
+        SetScript: |
+          npm install --global @openai/codex
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: claude
       settings:
