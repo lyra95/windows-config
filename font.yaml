@@ -1,0 +1,19 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  resources:
+    # D2Coding 최신 릴리스를 현재 사용자에게 설치
+    - resource: PSDscResources/Script
+      id: d2coding-font
+      directives:
+        description: D2Coding 최신 릴리스의 일반 및 Ligature 폰트 설치
+      settings:
+        GetScript: |
+          & "${WinGetConfigRoot}\font.ps1" -Mode Get
+        TestScript: |
+          & "${WinGetConfigRoot}\font.ps1" -Mode Test
+        SetScript: |
+          & "${WinGetConfigRoot}\font.ps1" -Mode Set
+
+  configurationVersion: 0.2.0
