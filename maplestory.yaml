@@ -12,12 +12,14 @@ properties:
       id: SetSystemLocaleToKoKR
       directives:
         description: Set system locale for non-Unicode programs (requires reboot)
+        securityContext: elevated
       settings:
         GetScript: |
-          (Get-WinSystemLocale).Name
+          return @{ Result = (Get-WinSystemLocale -ErrorAction Stop).Name }
         TestScript: |
-          (Get-WinSystemLocale).Name -eq 'ko-KR'
+          return (Get-WinSystemLocale -ErrorAction Stop).Name -eq 'ko-KR'
         SetScript: |
-          Set-WinSystemLocale -SystemLocale 'ko-KR'
+          Set-WinSystemLocale -SystemLocale 'ko-KR' -ErrorAction Stop
+          Write-Warning '시스템 로캘 변경을 완료하려면 Windows를 재부팅하세요.'
 
   configurationVersion: 0.2.0

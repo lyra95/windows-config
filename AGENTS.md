@@ -48,6 +48,8 @@ Get-WinGetConfiguration -File .\wsl.yaml | Invoke-WinGetConfiguration
 
 See `wsl.yaml` for details. The module is not required for normal CLI runs.
 
+`maplestory.yaml` elevates only the system-locale resource. `Set-WinSystemLocale` requires administrator rights and `-ErrorAction Stop` to surface failures; a successful apply still requires a reboot for the locale change to take full effect. Verify with `winget configure test -f .\maplestory.yaml` after reboot if needed.
+
 If DSC reports duplicate module versions, inspect `$env:PSModulePath` and `%LOCALAPPDATA%\Microsoft\WinGet\Configuration\Modules`. Keep a usable installed copy and move duplicates outside module search paths into a backup. This occurred with `Microsoft.WinGet.DSC` in the cache and `C:\Program Files\PowerShell\Modules`.
 
 ## Recommended application order
