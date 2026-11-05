@@ -3,6 +3,16 @@
 
 properties:
   resources:
+    # WinGet 구성 작업자도 이 런타임이 필요하므로, 없는 PC에서는 구성 실행 전에 설치해야 함.
+    # winget install --id Microsoft.VCRedist.2015+.x64 --exact --source winget --scope machine
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: visual-cpp-runtime
+      directives:
+        description: WinGet 구성 작업자에 필요한 Visual C++ x64 공용 런타임
+      settings:
+        id: Microsoft.VCRedist.2015+.x64
+        source: winget
+        useLatest: true
     - resource: Microsoft.Windows.Developer/DeveloperMode
       directives:
         securityContext: elevated
