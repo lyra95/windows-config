@@ -17,6 +17,7 @@ Each YAML is an independent WinGet DSC schema 0.2 document ending in `properties
 | `nvidia.yaml` | Versioned NVIDIA App installer; update through the app UI |
 | `podman.yaml` | Podman Desktop; bundled CLI MSI; `~/.local/bin/docker.exe` symlink to Podman |
 | `wsl.yaml` | WSL and optional Windows features; special execution path below |
+| `font.yaml` | D2Coding fonts for the current user via root-level `font.ps1` |
 | `profile.ps1` | Symlinked to `$PROFILE`; preserve this filename and path |
 | `.gitconfig` | Symlinked to `%USERPROFILE%\.gitconfig`; do not rename |
 | `claude-completion.ps1` | Generated from `claude -h`; header records version; regenerate when flags change |
@@ -48,6 +49,23 @@ Get-WinGetConfiguration -File .\wsl.yaml | Invoke-WinGetConfiguration
 See `wsl.yaml` for details. The module is not required for normal CLI runs.
 
 If DSC reports duplicate module versions, inspect `$env:PSModulePath` and `%LOCALAPPDATA%\Microsoft\WinGet\Configuration\Modules`. Keep a usable installed copy and move duplicates outside module search paths into a backup. This occurred with `Microsoft.WinGet.DSC` in the cache and `C:\Program Files\PowerShell\Modules`.
+
+## Recommended application order
+
+Apply only the configurations you need, one file at a time:
+
+1. `base.yaml` — shared prerequisites and shell setup; reopen the terminal afterward to refresh PATH.
+2. `font.yaml` — fonts for the terminal and editor.
+3. `git.yaml` — Git tools and identity/configuration.
+4. `apps.yaml` — general desktop applications.
+5. `ai.yaml` — AI tools; requires working Node.js/npm, which no YAML currently installs.
+6. `wsl.yaml` — use the PowerShell workaround above; complete any required reboot before using Podman's WSL backend.
+7. `podman.yaml` — container tools and Docker compatibility link.
+8. `nvidia.yaml` — optional NVIDIA App for compatible hardware.
+9. `etc.yaml` — optional MS Store app, kept separate for its prompts.
+10. `maplestory.yaml` — optional game setup; locale changes may require a final reboot.
+
+This is a suggested workflow, not a dependency chain. The important boundaries are the runtime bootstrap before configuration, base shell setup before dependent tools, npm before `ai.yaml`, and enabled WSL before using Podman.
 
 ## Editing conventions
 
