@@ -5,22 +5,16 @@ properties:
   resources:
     - resource: PSDscResources/Script
       id: NvidiaAppInstall
+      directives:
+        description: NVIDIA 공식 다운로드 페이지의 최신 NVIDIA App 설치 또는 업데이트
       settings:
         SetScript: |
-          $url = "https://kr.download.nvidia.com/nvapp/client/11.0.5.420/NVIDIA_app_v11.0.5.420.exe"
-          $output = "$env:TEMP\NVIDIA_app.exe"
-          Invoke-WebRequest -Uri $url -OutFile $output
-          Start-Process -FilePath $output -ArgumentList "/s" -Wait
+          & "${WinGetConfigRoot}\nvidia.ps1" -Mode Set
         GetScript: |
-          Get-WinGetPackage -Name "NVIDIA App" -ErrorAction SilentlyContinue | ForEach-Object { return $_.InstalledVersion }
-        
-        # Check if NVIDIA App is installed with any version
+          & "${WinGetConfigRoot}\nvidia.ps1" -Mode Get
         TestScript: |
-          $package = Get-WinGetPackage -Name "NVIDIA App" -ErrorAction SilentlyContinue
-          if ($null -ne $package) {
-              return $true
-          } else {
-              return $false
-          }
+          & "${WinGetConfigRoot}\nvidia.ps1" -Mode Test
+
+    # 같은 최신 버전 확인/설치 로직을 update-non-winget.ps1에서도 사용함.
 
   configurationVersion: 0.2.0

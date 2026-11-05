@@ -50,6 +50,14 @@ if (Get-Command npm -ErrorAction SilentlyContinue) {
     Invoke-UpdateStep 'Global npm packages' { npm update --global }
 }
 
+# nvidia.yaml과 같은 공식 다운로드 링크/버전 확인 로직 사용. 미설치 앱은 추가하지 않음.
+$nvidiaScript = Join-Path $PSScriptRoot 'nvidia.ps1'
+Invoke-UpdateStep 'NVIDIA App' {
+    if ((& $nvidiaScript -Mode Get).Result) {
+        & $nvidiaScript -Mode Set
+    }
+}
+
 if ($failures.Count) {
     Write-Host "`n일부 업데이트가 실패했습니다:" -ForegroundColor Yellow
     $failures | ForEach-Object { Write-Host " - $_" }
