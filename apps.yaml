@@ -14,34 +14,9 @@ properties:
         id: Spotify.Spotify
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: discord
-      settings:
-        id: Discord.Discord
-        source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: steam
-      settings:
-        id: Valve.Steam
-        source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: pdf
       settings:
         id: SumatraPDF.SumatraPDF
-        source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: parsec
-      settings:
-        id: Parsec.Parsec
-        source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: libreoffice
-      settings:
-        id: TheDocumentFoundation.LibreOffice
-        source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: telegram
-      settings:
-        id: Telegram.TelegramDesktop
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: tailscale
@@ -52,16 +27,6 @@ properties:
       id: anki
       settings:
         id: Anki.Anki
-        source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: jetbrains
-      settings:
-        id: JetBrains.Toolbox
-        source: winget
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: slack
-      settings:
-        id: SlackTechnologies.Slack
         source: winget
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: space-sniffer

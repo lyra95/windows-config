@@ -9,7 +9,9 @@ Each YAML is an independent WinGet DSC schema 0.2 document ending in `properties
 | File | Purpose |
 | --- | --- |
 | `base.yaml` | Latest Visual C++ x64 runtime; Developer Mode; WinGet support module; PATH; shell tools, modules, and profile symlink |
-| `apps.yaml` | General desktop apps from `winget` |
+| `apps.yaml` | Desktop apps shared by personal and work PCs from `winget` |
+| `apps-personal.yaml` | Personal PC apps from `winget` |
+| `apps-work.yaml` | Work PC apps from `winget` |
 | `ai.yaml` | Codex via global npm; Claude desktop/Code via WinGet; completion symlink |
 | `git.yaml` | Fork, Git, GitHub CLI; `.gitconfig` symlink |
 | `etc.yaml` | KakaoTalk via `msstore`; keep separate because reinstalling prompts again |
@@ -59,7 +61,7 @@ Apply only the configurations you need, one file at a time:
 1. `base.yaml` — shared prerequisites and shell setup; reopen the terminal afterward to refresh PATH.
 2. `font.yaml` — fonts for the terminal and editor.
 3. `git.yaml` — Git tools and identity/configuration.
-4. `apps.yaml` — general desktop applications.
+4. `apps.yaml` — shared desktop applications; then apply `apps-personal.yaml` or `apps-work.yaml` for the intended PC.
 5. `ai.yaml` — AI tools; requires working Node.js/npm, which no YAML currently installs.
 6. `wsl.yaml` — use the PowerShell workaround above; complete any required reboot before using Podman's WSL backend.
 7. `podman.yaml` — container tools and Docker compatibility link.
