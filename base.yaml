@@ -30,7 +30,7 @@ properties:
         GetScript: |
           Get-Module -ListAvailable -Name Microsoft.WinGet.Client
         TestScript: |
-          $modules = Get-Module -ListAvailable -Name Microsoft.WinGet.Client
+          $modules = @(Get-Module -ListAvailable -Name Microsoft.WinGet.Client)
           return $modules.Count -gt 0
     # $HOME\.local\bin 경로를 PATH에 추가
     - resource: PSDscResources/Script
