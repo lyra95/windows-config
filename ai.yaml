@@ -3,6 +3,11 @@
 
 properties:
   resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: uv
+      settings:
+        id: astral-sh.uv
+        source: winget
     - resource: PSDscResources/Script
       id: codex-cli-npm
       settings:
