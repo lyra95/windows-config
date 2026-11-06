@@ -20,8 +20,39 @@ properties:
       settings:
         id: GitHub.cli
         source: winget
+    # SU-01119는 회사용, 그 외 PC는 개인용 사용자 정보 사용
+    - resource: PSDscResources/Script
+      id: git-user
+      directives:
+        securityContext: elevated
+      settings:
+        GetScript: |
+          return $false
+        TestScript: |
+          $isWork = & "${WinGetConfigRoot}\is-work.ps1"
+          $configName = if ($isWork) { '.work.gitconfig' } else { '.home.gitconfig' }
+          $target = Join-Path $env:USERPROFILE '.gitconfig-user'
+          $item = Get-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue
+          if ($null -eq $item) { return $false }
+          return [bool]($item.LinkType -eq 'SymbolicLink' -and $item.Target -eq "${WinGetConfigRoot}\$configName")
+        SetScript: |
+          $isWork = & "${WinGetConfigRoot}\is-work.ps1"
+          $configName = if ($isWork) { '.work.gitconfig' } else { '.home.gitconfig' }
+          $source = "${WinGetConfigRoot}\$configName"
+          if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+            throw "사용자 정보 파일을 찾을 수 없습니다: $source"
+          }
+          $target = Join-Path $env:USERPROFILE '.gitconfig-user'
+          $item = Get-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue
+          if ($null -ne $item -and $item.LinkType -ne 'SymbolicLink') {
+            $backup = "$target.backup-$([guid]::NewGuid().ToString('N'))"
+            Move-Item -LiteralPath $target -Destination $backup -ErrorAction Stop
+          }
+          $null = New-Item -ItemType SymbolicLink -Path $target -Target $source -Force
     - resource: PSDscResources/Script
       id: gitconfig
+      dependsOn:
+        - git-user
       directives:
         securityContext: elevated
       settings:

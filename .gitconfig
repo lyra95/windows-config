@@ -24,6 +24,5 @@
 [rebase]
         updateRefs = true
 
-[user]
-        email = "95hyouka@gmail.com"
-        name = "jo"
+[include]
+        path = "~/.gitconfig-user"

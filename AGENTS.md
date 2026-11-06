@@ -13,7 +13,7 @@ Each YAML is an independent WinGet DSC schema 0.2 document ending in `properties
 | `apps-personal.yaml` | Personal PC apps from `winget` |
 | `apps-work.yaml` | Work PC apps from `winget` |
 | `ai.yaml` | Codex via global npm; Claude desktop/Code via WinGet; completion symlink |
-| `git.yaml` | Fork, Git, GitHub CLI; `.gitconfig` symlink |
+| `git.yaml` | Fork, Git, GitHub CLI; `.gitconfig` and hostname-selected `.gitconfig-user` symlinks |
 | `etc.yaml` | KakaoTalk via `msstore`; keep separate because reinstalling prompts again |
 | `maplestory.yaml` | Nexon Plug; Korean system locale (may require reboot) |
 | `nvidia.yaml` | Latest NVIDIA App from its official download page via root-level `nvidia.ps1` |
@@ -22,6 +22,8 @@ Each YAML is an independent WinGet DSC schema 0.2 document ending in `properties
 | `font.yaml` | D2Coding fonts for the current user via root-level `font.ps1` |
 | `profile.ps1` | Symlinked to `$PROFILE`; preserve this filename and path |
 | `.gitconfig` | Symlinked to `%USERPROFILE%\.gitconfig`; do not rename |
+| `.home.gitconfig`, `.work.gitconfig` | Git identity only; `hostname` selects work for `SU-01119`, home otherwise; linked as `%USERPROFILE%\.gitconfig-user` and included by `.gitconfig` |
+| `is-work.ps1` | Returns a Boolean for work PC detection using `hostname`; `SU-01119` is work, other hosts are home |
 | `claude-completion.ps1` | Generated from `claude -h`; header records version; regenerate when flags change |
 | `update-non-winget.ps1` | PowerShell Gallery, global npm, and installed NVIDIA App updater |
 | `makefile` | Only `format`, for `profile.ps1` |
