@@ -13,5 +13,37 @@ properties:
       settings:
         id: SlackTechnologies.Slack
         source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: p4v
+      settings:
+        id: Perforce.P4V
+        source: winget
+    - resource: PSDscResources/Script
+      id: p4-settings
+      dependsOn:
+        - p4v
+      directives:
+        description: Perforce 설정 파일과 무시 파일 이름 지정
+      settings:
+        GetScript: |
+          return $false
+        TestScript: |
+          $settings = Get-ItemProperty -LiteralPath 'HKCU:\Software\Perforce\Environment' -ErrorAction SilentlyContinue
+          if ($null -eq $settings) { return $false }
+          foreach ($name in @('P4CONFIG', 'P4IGNORE')) {
+            if ($null -eq $settings.PSObject.Properties[$name]) { return $false }
+          }
+          return [bool]($settings.P4CONFIG -eq '.p4config' -and $settings.P4IGNORE -eq '.p4ignore')
+        SetScript: |
+          $p4 = Get-Command p4 -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source
+          # 설치 직후에는 현재 프로세스의 PATH가 갱신되지 않을 수 있음
+          if (-not $p4) {
+            $p4 = Join-Path $env:ProgramFiles 'Perforce\p4.exe'
+          }
+          if (-not (Test-Path -LiteralPath $p4 -PathType Leaf)) { throw 'p4.exe를 찾을 수 없습니다' }
+          & $p4 set P4CONFIG=.p4config
+          if ($LASTEXITCODE -ne 0) { throw "P4CONFIG 설정 실패 (exit $LASTEXITCODE)" }
+          & $p4 set P4IGNORE=.p4ignore
+          if ($LASTEXITCODE -ne 0) { throw "P4IGNORE 설정 실패 (exit $LASTEXITCODE)" }
 
   configurationVersion: 0.2.0
