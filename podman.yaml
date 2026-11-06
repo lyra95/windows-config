@@ -27,7 +27,7 @@ properties:
         GetScript: |
           return $false
         TestScript: |
-          $podman = (Get-Command podman -CommandType Application -ErrorAction SilentlyContinue).Source
+          $podman = Get-Command podman -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source
           if (-not $podman) {
             $podman = @("$env:LOCALAPPDATA\Programs\Podman\podman.exe", "$env:ProgramFiles\RedHat\Podman\podman.exe") |
               Where-Object { Test-Path -Path $_ -PathType Leaf } | Select-Object -First 1
@@ -57,7 +57,7 @@ properties:
         GetScript: |
           return $false
         TestScript: |
-          $podman = (Get-Command podman -CommandType Application -ErrorAction SilentlyContinue).Source
+          $podman = Get-Command podman -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source
           if (-not $podman) {
             $podman = @("$env:LOCALAPPDATA\Programs\Podman\podman.exe", "$env:ProgramFiles\RedHat\Podman\podman.exe") |
               Where-Object { Test-Path -Path $_ -PathType Leaf } | Select-Object -First 1
@@ -67,7 +67,7 @@ properties:
           if ($null -eq $item) { return $false }
           return [bool]($item.LinkType -eq 'SymbolicLink' -and $item.Target -eq $podman)
         SetScript: |
-          $podman = (Get-Command podman -CommandType Application -ErrorAction SilentlyContinue).Source
+          $podman = Get-Command podman -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source
           if (-not $podman) {
             $podman = @("$env:LOCALAPPDATA\Programs\Podman\podman.exe", "$env:ProgramFiles\RedHat\Podman\podman.exe") |
               Where-Object { Test-Path -Path $_ -PathType Leaf } | Select-Object -First 1
