@@ -58,6 +58,14 @@ Invoke-UpdateStep 'NVIDIA App' {
     }
 }
 
+# font.yaml과 같은 설치/검증 로직 사용. 버전 파일이 있는 사용자 설치만 업데이트함.
+$fontScript = Join-Path $PSScriptRoot 'font.ps1'
+Invoke-UpdateStep 'D2Coding fonts' {
+    if ((& $fontScript -Mode Get).Result) {
+        & $fontScript -Mode Set
+    }
+}
+
 if ($failures.Count) {
     Write-Host "`n일부 업데이트가 실패했습니다:" -ForegroundColor Yellow
     $failures | ForEach-Object { Write-Host " - $_" }

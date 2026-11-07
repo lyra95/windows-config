@@ -25,7 +25,7 @@ Each YAML is an independent WinGet DSC schema 0.2 document ending in `properties
 | `.home.gitconfig`, `.work.gitconfig` | Git identity only; `hostname` selects work for `SU-01119`, home otherwise; linked as `%USERPROFILE%\.gitconfig-user` and included by `.gitconfig` |
 | `is-work.ps1` | Returns a Boolean for work PC detection using `hostname`; `SU-01119` is work, other hosts are home |
 | `claude-completion.ps1` | Generated from `claude -h`; header records version; regenerate when flags change |
-| `update-non-winget.ps1` | PowerShell Gallery, global npm, and installed NVIDIA App updater |
+| `update-non-winget.ps1` | PowerShell Gallery, global npm, installed NVIDIA App, and D2Coding updater |
 | `makefile` | Only `format`, for `profile.ps1` |
 | `readme.md` | Korean TODO list |
 
@@ -78,6 +78,7 @@ This is a suggested workflow, not a dependency chain. The important boundaries a
 - Resources: `Microsoft.WinGet.DSC/WinGetPackage` for WinGet/MS Store, `PSDscResources/Script` for custom steps, `PSDscResources/WindowsOptionalFeature` for Windows features.
 - Put dependencies in resource-level `dependsOn`. Use `directives.securityContext: elevated` only where needed; follow existing symlink patterns.
 - Check helper scripts under `Set-StrictMode -Version Latest`, as used by DSC. Registry entries may lack properties such as `DisplayName`; check property existence before accessing them.
+- Script resources must return a `@{ Result = <string> }` hashtable from `GetScript`. Font installation must preserve existing HKCU font registrations and verify both files and registration values, not just a version marker.
 - Add personal shell scripts to `~/.config/my-ps-scripts/`; the profile dot-sources `*.ps1` in filename order and warns on failures. Avoid expanding the profile for these scripts.
 - After editing the profile, run `make format` (PSScriptAnalyzer; GNU Make at `C:\Program Files (x86)\GnuWin32\bin`), then `Reload` in the live session.
 - When changing non-WinGet installers, update `update-non-winget.ps1` in the same change if reliable automation exists; otherwise document the update path beside the resource or in the updater. Do not add speculative package managers or WinGet apps to this updater.
@@ -91,4 +92,4 @@ pwsh -File .\update-non-winget.ps1 -WhatIf
 pwsh -File .\update-non-winget.ps1
 ```
 
-Handles PowerShell Gallery modules, global npm packages (including Codex), and installed NVIDIA App. `nvidia.ps1` resolves the official x64/ARM64 download link, skips equal/newer versions, verifies the NVIDIA signature, and checks installer exit code and installed version. A changed page/link format fails explicitly; keep it synchronized with NVIDIA's download page. Update Podman CLI through Podman Desktop.
+Handles PowerShell Gallery modules, global npm packages (including Codex), installed NVIDIA App, and D2Coding installed by `font.yaml`. Fonts use the latest GitHub release and remain per-user; reopen applications to pick up new fonts. `nvidia.ps1` resolves the official x64/ARM64 download link, skips equal/newer versions, verifies the NVIDIA signature, and checks installer exit code and installed version. A changed page/link format fails explicitly; keep it synchronized with NVIDIA's download page. Update Podman CLI through Podman Desktop.

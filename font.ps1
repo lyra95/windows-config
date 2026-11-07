@@ -9,6 +9,7 @@ $ErrorActionPreference = 'Stop'
 
 $installDir = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts'
 $versionFile = Join-Path $installDir 'D2Coding.version'
+$registryPath = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
 $releaseUri = 'https://api.github.com/repos/naver/d2-coding-font/releases/latest'
 $fontMap = @(
     @{ Source = 'D2Coding/D2Coding-*.ttf'; Name = 'D2Coding-Regular.ttf'; RegistryName = 'D2Coding-Regular (TrueType)' },
@@ -32,12 +33,22 @@ function Test-FontInstalled {
 
     if (-not (Test-Path -Path $versionFile -PathType Leaf)) { return $false }
     if ((Get-Content -Path $versionFile -Raw).Trim() -ne $Version) { return $false }
-    return @($fontMap | Where-Object { -not (Test-Path -Path (Join-Path $installDir $_.Name) -PathType Leaf) }).Count -eq 0
+    if (-not (Test-Path -LiteralPath $registryPath)) { return $false }
+    foreach ($font in $fontMap) {
+        $destinationPath = Join-Path $installDir $font.Name
+        if (-not (Test-Path -LiteralPath $destinationPath -PathType Leaf)) { return $false }
+        $registeredPath = Get-ItemPropertyValue -LiteralPath $registryPath -Name $font.RegistryName -ErrorAction SilentlyContinue
+        if ($registeredPath -ne $destinationPath) { return $false }
+    }
+    return $true
 }
 
 switch ($Mode) {
     'Get' {
-        return $false
+        $version = if (Test-Path -LiteralPath $versionFile -PathType Leaf) {
+            (Get-Content -LiteralPath $versionFile -Raw).Trim()
+        } else { '' }
+        return @{ Result = $version }
     }
     'Test' {
         try {
@@ -60,8 +71,10 @@ switch ($Mode) {
             Invoke-WebRequest -Uri $latest.Asset.browser_download_url -OutFile $archivePath
             Expand-Archive -LiteralPath $archivePath -DestinationPath $workDir
 
-            $registryPath = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
-            $null = New-Item -Path $registryPath -Force
+            # 기존 키와 다른 폰트 등록 값을 유지함.
+            if (-not (Test-Path -LiteralPath $registryPath)) {
+                $null = New-Item -Path $registryPath
+            }
             foreach ($font in $fontMap) {
                 $sourcePath = Get-ChildItem -Path (Join-Path $workDir $font.Source) -File | Select-Object -First 1 -ExpandProperty FullName
                 if (-not $sourcePath) { throw "릴리스에서 폰트 파일을 찾을 수 없습니다: $($font.Source)" }
@@ -70,10 +83,18 @@ switch ($Mode) {
                 Copy-Item -LiteralPath $sourcePath -Destination $destinationPath -Force
                 New-ItemProperty -Path $registryPath -Name $font.RegistryName -Value $destinationPath -PropertyType String -Force | Out-Null
             }
-            Set-Content -Path $versionFile -Value $latest.Release.tag_name -NoNewline
+            Set-Content -Path $versionFile -Value $latest.Release.tag_name -NoNewline -Encoding utf8NoBOM
+            if (-not (Test-FontInstalled -Version $latest.Release.tag_name)) {
+                throw 'D2Coding 설치 후 파일 또는 레지스트리 등록을 확인할 수 없습니다.'
+            }
         }
         finally {
-            Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
+            $tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+            $resolvedWorkDir = [IO.Path]::GetFullPath($workDir)
+            if ([IO.Path]::GetDirectoryName($resolvedWorkDir).TrimEnd('\') -ne $tempRoot.TrimEnd('\')) {
+                throw "임시 폴더 밖의 경로는 정리할 수 없습니다: $resolvedWorkDir"
+            }
+            Remove-Item -LiteralPath $resolvedWorkDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 }
