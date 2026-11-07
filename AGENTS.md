@@ -19,6 +19,7 @@ Each YAML is an independent WinGet DSC schema 0.2 document ending in `properties
 | `nvidia.yaml` | Latest NVIDIA App from its official download page via root-level `nvidia.ps1` |
 | `podman.yaml` | Podman Desktop; bundled CLI MSI; `~/.local/bin/docker.exe` symlink to Podman |
 | `wsl.yaml` | WSL and optional Windows features; special execution path below |
+| `hyper-v.yaml` | Hyper-V platform, services, and GUI/PowerShell management tools; no VM creation; reboot required |
 | `font.yaml` | D2Coding fonts for the current user via root-level `font.ps1` |
 | `profile.ps1` | Symlinked to `$PROFILE`; preserve this filename and path |
 | `.gitconfig` | Symlinked to `%USERPROFILE%\.gitconfig`; do not rename |
@@ -52,6 +53,19 @@ Get-WinGetConfiguration -File .\wsl.yaml | Invoke-WinGetConfiguration
 
 See `wsl.yaml` for details. The module is not required for normal CLI runs.
 
+`hyper-v.yaml` is independent of `wsl.yaml` and `podman.yaml`. It requires a Hyper-V-capable Windows edition and firmware virtualization enabled. Apply it with the normal CLI first; if optional-feature COM errors occur, try the elevated PowerShell 7 module path above with `hyper-v.yaml`. It does not change Podman's WSL provider, create VMs, or restart Windows automatically. Reboot manually after applying, then verify with `winget configure test -f .\hyper-v.yaml` and create VMs in Hyper-V Manager.
+
+On Windows build 26300.9711, both the CLI and elevated module path stalled while DISM logged `DismHostManager` COM activation error `0x80040154`. This is different from the WSL CLI parsing error above. Do not repeatedly start concurrent applies. If this occurs, stop the stalled attempt and try native DISM from an elevated shell, without automatic reboot:
+
+```powershell
+dism.exe /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V-All /All /NoRestart
+dism.exe /Online /Get-Features /Format:Table /English
+```
+
+Check all seven `Microsoft-Hyper-V*` features for `Enabled` or `Enable Pending`. Exit code `3010` means success with a reboot required. Native DISM verification is separate from a successful YAML apply/test; do not report DSC verification as passed if its COM path still fails.
+
+On this build, native DISM succeeded from elevated Windows PowerShell (`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`): exit `3010`, all seven features `Enabled`. If launching elevation through the Store `pwsh.exe` app execution alias does not show a usable UAC prompt, use the explicit Windows PowerShell executable path.
+
 `maplestory.yaml` elevates only the system-locale resource. `Set-WinSystemLocale` requires administrator rights and `-ErrorAction Stop` to surface failures; a successful apply still requires a reboot for the locale change to take full effect. Verify with `winget configure test -f .\maplestory.yaml` after reboot if needed.
 
 If DSC reports duplicate module versions, inspect `$env:PSModulePath` and `%LOCALAPPDATA%\Microsoft\WinGet\Configuration\Modules`. Keep a usable installed copy and move duplicates outside module search paths into a backup. This occurred with `Microsoft.WinGet.DSC` in the cache and `C:\Program Files\PowerShell\Modules`.
@@ -70,6 +84,7 @@ Apply only the configurations you need, one file at a time:
 8. `nvidia.yaml` — optional NVIDIA App for compatible hardware.
 9. `etc.yaml` — optional MS Store app, kept separate for its prompts.
 10. `maplestory.yaml` — optional game setup; locale changes may require a final reboot.
+11. `hyper-v.yaml` — optional standalone Hyper-V host and management tools; reboot before creating VMs in the GUI.
 
 This is a suggested workflow, not a dependency chain. The important boundaries are the runtime bootstrap before configuration, base shell setup before dependent tools, npm before `ai.yaml`, and enabled WSL before using Podman.
 

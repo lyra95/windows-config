@@ -1,0 +1,84 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+# Windows Pro/Enterprise 등 Hyper-V 지원 에디션과 BIOS/UEFI의 CPU 가상화 활성화 필요
+# https://learn.microsoft.com/windows-server/virtualization/hyper-v/get-started/install-hyper-v
+# Hyper-V 플랫폼과 GUI/PowerShell 관리 도구만 활성화. VM은 재부팅 후 Hyper-V 관리자에서 생성
+# 자동 재부팅은 하지 않으므로 적용 완료 후 직접 재부팅할 것
+# 기본 적용: winget configure -f .\hyper-v.yaml
+# wsl.yaml과 같은 선택적 기능 COM 파싱/권한 오류가 발생하면 관리자 PowerShell 7에서:
+#   Install-PSResource -Name Microsoft.WinGet.Configuration -Scope CurrentUser
+#   Get-WinGetConfiguration -File .\hyper-v.yaml | Invoke-WinGetConfiguration
+# 모듈 방식도 DISM COM 오류(0x80040154)로 멈추면 진행 중인 적용을 중단한 뒤 관리자 셸에서:
+#   dism.exe /Online /Enable-Feature /FeatureName:Microsoft-Hyper-V-All /All /NoRestart
+#   dism.exe /Online /Get-Features /Format:Table /English
+# 위 DISM 직접 실행은 이 PC에서 성공 확인. 종료 코드 3010은 성공(재부팅 필요)
+# 재부팅 후 검증: winget configure test -f .\hyper-v.yaml
+
+properties:
+  resources:
+    # WindowsOptionalFeature에는 -All 옵션이 없으므로 부모 기능부터 각각 활성화
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: hyper-v-all
+      directives:
+        securityContext: elevated
+      settings:
+        Name: Microsoft-Hyper-V-All
+        Ensure: Present
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: hyper-v-platform
+      dependsOn:
+        - hyper-v-all
+      directives:
+        securityContext: elevated
+      settings:
+        Name: Microsoft-Hyper-V
+        Ensure: Present
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: hyper-v-hypervisor
+      dependsOn:
+        - hyper-v-platform
+      directives:
+        securityContext: elevated
+      settings:
+        Name: Microsoft-Hyper-V-Hypervisor
+        Ensure: Present
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: hyper-v-services
+      dependsOn:
+        - hyper-v-hypervisor
+      directives:
+        securityContext: elevated
+      settings:
+        Name: Microsoft-Hyper-V-Services
+        Ensure: Present
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: hyper-v-tools
+      dependsOn:
+        - hyper-v-all
+      directives:
+        securityContext: elevated
+      settings:
+        Name: Microsoft-Hyper-V-Tools-All
+        Ensure: Present
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: hyper-v-manager
+      dependsOn:
+        - hyper-v-tools
+        - hyper-v-services
+      directives:
+        securityContext: elevated
+      settings:
+        Name: Microsoft-Hyper-V-Management-Clients
+        Ensure: Present
+    - resource: PSDscResources/WindowsOptionalFeature
+      id: hyper-v-powershell
+      dependsOn:
+        - hyper-v-tools
+      directives:
+        securityContext: elevated
+      settings:
+        Name: Microsoft-Hyper-V-Management-PowerShell
+        Ensure: Present
+
+  configurationVersion: 0.2.0
