@@ -51,5 +51,10 @@ properties:
       settings:
         id: Amazon.AWSCLI
         source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: pulumi
+      settings:
+        id: Pulumi.Pulumi
+        source: winget
 
   configurationVersion: 0.2.0
