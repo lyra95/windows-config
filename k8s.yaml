@@ -1,0 +1,22 @@
+# https://github.com/microsoft/winget-dsc
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: kubectl
+      settings:
+        id: Kubernetes.kubectl
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: helm
+      settings:
+        id: Helm.Helm
+        source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: kustomize
+      settings:
+        id: Kubernetes.kustomize
+        source: winget
+
+  configurationVersion: 0.2.0

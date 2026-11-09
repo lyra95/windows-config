@@ -46,4 +46,10 @@ properties:
           & $p4 set P4IGNORE=.p4ignore
           if ($LASTEXITCODE -ne 0) { throw "P4IGNORE 설정 실패 (exit $LASTEXITCODE)" }
 
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: awscli
+      settings:
+        id: Amazon.AWSCLI
+        source: winget
+
   configurationVersion: 0.2.0
