@@ -56,5 +56,10 @@ properties:
       settings:
         id: Pulumi.Pulumi
         source: winget
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: unity-hub
+      settings:
+        id: Unity.UnityHub
+        source: winget
 
   configurationVersion: 0.2.0
