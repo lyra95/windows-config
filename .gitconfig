@@ -26,3 +26,8 @@
 
 [include]
         path = "~/.gitconfig-user"
+[safe]
+	directory = E:/dev/nikke
+	directory = E:/dev/nk-backend2
+[credential "https://git.tencent.com"]
+	provider = generic
