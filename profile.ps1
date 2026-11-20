@@ -20,6 +20,20 @@ Set-Alias -Name open -Value Invoke-Item
 
 Set-Alias -Name which -Value Get-Command
 
+function global:Open-Hosts {
+    $codeLauncher = Get-Command code.cmd -CommandType Application -ErrorAction Stop
+    $codeExe = Join-Path (Split-Path (Split-Path $codeLauncher.Source)) 'Code.exe'
+    $hostsPath = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
+
+    # 일반 VS Code 창과 별도 인스턴스로 실행
+    $adminUserData = Join-Path $env:LOCALAPPDATA 'VSCode-Admin'
+    Start-Process -FilePath $codeExe -Verb RunAs -ArgumentList '--user-data-dir', "`"$adminUserData`"", "`"$hostsPath`""
+}
+
+function global:Open-KnownHosts {
+    code (Join-Path $HOME '.ssh\known_hosts')
+}
+
 # misc
 Set-PSReadLineOption -HistoryNoDuplicates:$True
 
